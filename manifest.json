@@ -1,0 +1,27 @@
+{
+    "manifest_version": 2,
+    "name": "YouTube Sub Hider",
+    "version": "1.0",
+    "description": "Extension that hides specified subscriptions",
+    "icons": {
+        "128": "icon128.png",
+        "48": "icon48.png",
+        "16": "icon16.png"
+    },
+    "browser_action": {
+        "default_icon": "icon16.png",
+        "default_popup": "popup.html"
+    },
+    "permissions": [
+        "storage",
+        "*://*.youtube.com/feed/subscriptions"
+    ],
+    "content_scripts": [
+        {
+            "matches": [ "*://*.youtube.com/feed/subscriptions" ],
+            "js": [ "content-script.js" ],
+            "css": [ "content-script.css"],
+            "run_at": "document_idle"
+        }
+    ]
+}

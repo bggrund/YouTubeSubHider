@@ -1,0 +1,26 @@
+.hide-button {
+    background-color: rgb(64, 60, 71);
+    height: 16px;
+    width: 16px;
+    min-width: 16px;
+    padding: 0;
+    margin: 0 2px 0 0px;
+    font-size: 10px;
+    color: white;
+    text-align: center;
+    border-style: none;
+    border-radius: 5px;
+    outline-style: none;  
+}
+
+.hide-button:hover {
+    background-color: rgb(128, 120, 120);
+}
+
+.hide-button:active {
+    background-color: rgb(177, 168, 168);
+}
+
+.yt-sub-hider {
+    display: none;
+}
