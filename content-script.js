@@ -10,7 +10,7 @@ function start() {
     chrome.storage.sync.get(["channelList", "hideVideos"], (data) => {
         if(data.hideVideos == null) chrome.storage.sync.set({ "channelList": [], "hideVideos": true }, () => { });
         channelsToRemove = data.channelList ?? [];
-        hideVideos = data.hideVideos;
+        hideVideos = data.hideVideos ?? true;
 
         var checkContentInterval = setInterval(() => {
             if(document.querySelector(contentSelector) != null)
