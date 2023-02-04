@@ -2,23 +2,33 @@ var channelsToRemove;
 var checkNewSectionInterval = 2000;
 var hideVideos = true;
 var numSections = 0;
+var contentSelector = "#contents";
 
 start();
 
 function start() {
     chrome.storage.sync.get(["channelList", "hideVideos"], (data) => {
+        if(data.hideVideos == null) chrome.storage.sync.set({ "channelList": [], "hideVideos": true }, () => { });
         channelsToRemove = data.channelList ?? [];
         hideVideos = data.hideVideos;
 
-        checkNewSection(hideVideos);
+        var checkContentInterval = setInterval(() => {
+            if(document.querySelector(contentSelector) != null)
+            {
+                clearInterval(checkContentInterval);
+            
+                checkNewSection(hideVideos);
+                
+                setInterval(() => {
+                    checkNewSection(hideVideos);
+                    var sections = document.getElementById("contents");
+    
+                    // Other extensions may hide videos independent from this one, so periodically check the section headers for videos
+                    for(var c = 0; c < sections.children.length; c++) checkSection(c);
+                }, checkNewSectionInterval);
+            }
+        }, 500);
         
-        setInterval(() => {
-            checkNewSection(hideVideos);
-            var sections = document.getElementById("contents");
-
-            // Other extensions may hide videos independent from this one, so periodically check the section headers for videos
-            for(var c = 0; c < sections.children.length; c++) checkSection(c);
-        }, checkNewSectionInterval);
     });
 }
 
