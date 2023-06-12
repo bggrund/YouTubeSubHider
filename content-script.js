@@ -1,17 +1,19 @@
 var channelsToRemove;
 var checkNewSectionInterval = 2000;
 var hideVideos = true;
-var numSections = 0;
+var numRows = 0;
 var contentSelector = "#contents";
 
 start();
 
 function start() {
     chrome.storage.sync.get(["channelList", "hideVideos"], (data) => {
+        // Get channel data stored in browser, or create new empty data
         if(data.hideVideos == null) chrome.storage.sync.set({ "channelList": [], "hideVideos": true }, () => { });
         channelsToRemove = data.channelList ?? [];
         hideVideos = data.hideVideos ?? true;
 
+        // Wait for contents to load
         var checkContentInterval = setInterval(() => {
             if(document.querySelector(contentSelector) != null)
             {
@@ -21,10 +23,10 @@ function start() {
                 
                 setInterval(() => {
                     checkNewSection(hideVideos);
-                    var sections = document.getElementById("contents");
+                    var sections = document.querySelector(contentSelector);
     
                     // Other extensions may hide videos independent from this one, so periodically check the section headers for videos
-                    for(var c = 0; c < sections.children.length; c++) checkSection(c);
+                    // for(var c = 0; c < sections.children.length; c++) checkSection(c);
                 }, checkNewSectionInterval);
             }
         }, 500);
@@ -48,10 +50,12 @@ function refresh()
 }
 
 function addHideButtons(sectionStart){
-    var sections = document.getElementById("contents");
+    var sections = document.querySelector(contentSelector);
 
     for(var c = sectionStart; c < sections.children.length; c++) {
-        var items = sections.children[c].querySelector("#items");
+        if(sections.children[c].tagName.toLowerCase() != "ytd-rich-grid-row") continue;
+
+        var items = sections.children[c].children[0];
         
         if(items == null) continue;    
 
@@ -74,25 +78,27 @@ function addHideButtons(sectionStart){
                     refresh();
                 }
             };
-            var container = items.children[i].querySelector("yt-formatted-string");
-            container.prepend(hideButton);
+            var container = items.children[i].querySelector("#text > a");
+            container.parentElement.prepend(hideButton);
         }
     }
 }
 
 function toggleHidden(hidden, startSection = 0){
-    var sections = document.getElementById("contents");
+    var sections = document.querySelector(contentSelector);
 
-    numSections = startSection;
+    numRows = startSection;
     for(var c = startSection; c < sections.children.length; c++){
-        var items = sections.children[c].querySelector("#items");
+        if(sections.children[c].tagName.toLowerCase() != "ytd-rich-grid-row") continue;
 
-        if(items == null) continue;
+        var items = sections.children[c].children[0];
+        
+        if(items == null) continue;    
 
-        numSections++;
+        numRows++;
 
         for (var i = 0; i < items.children.length; i++) {
-            var node = items.children[i].getElementsByClassName("yt-simple-endpoint style-scope yt-formatted-string")[0];
+            var node = items.children[i].querySelector("#text > a");
             var channelName = node.textContent;
 
             var channelFound = false;
@@ -119,7 +125,7 @@ function toggleHidden(hidden, startSection = 0){
         }
 
         //  Remove section header if no videos shown
-        checkSection(c);
+        // checkSection(c);
     }
 }
 
@@ -147,8 +153,15 @@ function checkSection(sectionIndex) {
 }
 
 function checkNewSection(hideVideos){
-    if (document.getElementById("contents").children.length - 1 > numSections){
-        addHideButtons(numSections);
-        if (hideVideos) toggleHidden(true, numSections);
+    // if (document.getElementById("contents").children.length - 1 > numSections){
+    //     addHideButtons(numSections);
+    //     if (hideVideos) toggleHidden(true, numSections);
+    // }
+
+    // Check for new rows
+    if (document.querySelector(contentSelector).children.length - 2 > numRows)
+    {
+        addHideButtons(numRows);
+        if (hideVideos) toggleHidden(true, numRows);
     }
 }
